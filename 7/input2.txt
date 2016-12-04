@@ -1,0 +1,9 @@
+123 -> aa
+456 -> ay
+aa -> ax
+ax AND ay -> ad
+ax OR ay -> ae
+ax LSHIFT 2 -> af
+ay RSHIFT 2 -> ag
+NOT ax -> ah
+NOT ay -> ai
