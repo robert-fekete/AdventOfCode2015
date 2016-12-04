@@ -46,7 +46,7 @@ def solve_second(input_string, amount):
     return solve_rec_min(amount, 0, 0, len(numbers), 0, numbers)[1]
 
 
-print solve_first("20\n15\n10\n5\n5\n", 25)
+print solve_first("20\n15\n10\n5\n5\n", 25)  # 4
 print solve_first(open(r'.\input.txt', 'r').read(), 150)
-print solve_second("20\n15\n10\n5\n5\n", 25)
+print solve_second("20\n15\n10\n5\n5\n", 25)  # 3
 print solve_second(open(r'.\input.txt', 'r').read(), 150)
