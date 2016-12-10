@@ -1,5 +1,5 @@
 import re
-from collections import deque
+from collections import deque, Counter
 
 
 def solve_first(input_string):
@@ -29,20 +29,29 @@ def solve_first(input_string):
 
     return len(results)
 
+def tokenize(molecule):
+
+    tokens = {}
+    i = 1
+    prev_i = 0
+    while i < len(molecule):
+        if molecule[i].isupper():
+            token = molecule[prev_i:i]
+            if token not in tokens:
+                tokens[token] = 0
+            tokens[token] += 1
+
+            prev_i = i
+        i+=1
+
+    return tokens
 
 def solve_second(input_string):
 
     parts = [part for part in input_string.strip().split('\n') if part != ""]
     replacement_strings = parts[:-1]
     required_molecule = parts[-1]
-    Ys = len(re.findall("Y", required_molecule))
-    Rns = len(re.findall("Rn", required_molecule))
-    Ars = len(re.findall("Ar", required_molecule))
-    
-    print "numbers"
-    print Ys
-    print Rns
-    print Ars
+    required_atoms = tokenize(required_molecule)
 
     replacements = {}
 
@@ -55,7 +64,7 @@ def solve_second(input_string):
         replacements[from_what].append(to_what)
         
     queue = deque([])
-    visited = []
+    visited = {}
 
     queue.append(('e', 0))
 
@@ -69,26 +78,27 @@ def solve_second(input_string):
             max_steps = steps
             print len(queue)
 
-        
-        if molecule in visited:
+
+        molecule_length = len(molecule)
+        if molecule_length not in visited:
+            visited[molecule_length] = {}
+
+        if molecule in visited[molecule_length]:
             continue
 
-        visited.append(molecule)
-        
-        if len(molecule) > len(required_molecule):
+        visited[molecule_length][molecule] = True
+
+        if molecule_length > len(required_molecule):
             continue
             
-            
-        tYs = len(re.findall("Y", molecule))
-        if tYs > Ys:
+        atoms = tokenize(molecule)
+        if "Y" in atoms and atoms["Y"] > required_atoms["Y"]:
             continue
-            
-        tRns = len(re.findall("Rn", molecule))
-        if tRns > Rns:
+
+        if "Rn" in atoms and atoms["Rn"] > required_atoms["Rn"]:
             continue
-            
-        tArs = len(re.findall("Ar", molecule))
-        if tArs > Ars:
+
+        if "Ar" in atoms and atoms["Ar"] > required_atoms["Ar"]:
             continue
             
 
@@ -98,7 +108,6 @@ def solve_second(input_string):
                 fromm = molecule[i]
                 for to in replacements[fromm]:
                     new_molecule = mol_list[:i] + [to] + mol_list[i+1:]
-                    # print molecule[:match.start(0)] + to + molecule[match.end(0):]
 
                     new_molecule = "".join(new_molecule)
                     if new_molecule == required_molecule:
@@ -109,7 +118,6 @@ def solve_second(input_string):
                 fromm = molecule[i:i+2]
                 for to in replacements[fromm]:
                     new_molecule = mol_list[:i] + list(to) + mol_list[i+2:]
-                    # print molecule[:match.start(0)] + to + molecule[match.end(0):]
 
                     new_molecule = "".join(new_molecule)
                     if new_molecule == required_molecule:
@@ -120,13 +128,13 @@ def solve_second(input_string):
     return -1
 
 
-print solve_first("H => HO\nH => OH\nO => HH\n\nHOH")  # 4
-print solve_first("H => HO\nH => OH\nO => HH\n\nHOHOHO")  # 7
-print solve_first("H => OO\n\nH2O")  # 1
-print solve_first("Mg => WUT\n\nMgMg")  # 2
-print solve_first(open(r'.\input.txt', 'r').read())
-
-print solve_second("e => O\ne => H\nH => HO\nH => OH\nO => HH\n\nHOH")  # 3
-print solve_second("e => O\ne => H\nH => HO\nH => OH\nO => HH\n\nHOHOHO")  # 6
-print solve_second("e => Mg\nMg => MgMg\nMg => Ag\n\nAgAg")  # 4
+# print solve_first("H => HO\nH => OH\nO => HH\n\nHOH")  # 4
+# print solve_first("H => HO\nH => OH\nO => HH\n\nHOHOHO")  # 7
+# print solve_first("H => OO\n\nH2O")  # 1
+# print solve_first("Mg => WUT\n\nMgMg")  # 2
+# print solve_first(open(r'.\input.txt', 'r').read())
+#
+# print solve_second("e => O\ne => H\nH => HO\nH => OH\nO => HH\n\nHOH")  # 3
+# print solve_second("e => O\ne => H\nH => HO\nH => OH\nO => HH\n\nHOHOHO")  # 6
+# print solve_second("e => Mg\nMg => MgMg\nMg => Ag\n\nAgAg")  # 4
 print solve_second(open(r'.\input.txt', 'r').read())
