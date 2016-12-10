@@ -89,5 +89,3 @@ print solve(13, 8, 10, 250)
 print solve(14, 8, 10, 250)
 print solve(boss_hp, boss_damage, 50, 500)
 print solve(boss_hp, boss_damage, 50, 500, 1)
-        
-                
