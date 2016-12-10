@@ -1,41 +1,61 @@
 from operator import mul
+from functools import wraps
 
-def organize(packages, limit1, limit2, first, second, third, acc):
-    
-    if len(first) > limit2 or len(second) > limit2:
-        return
-        
-    if sum(first) > limit1:
-        return
-        
-    if sum(second) > limit1:
-        return
-        
-    if sum(third) > limit1:
-        return
-        
-    if len(packages) == 0:
-        if len(second) < len(first) or len(third) < len(first):
-            return
-        acc.append((first, second, third))
-        return
-        
-    organize(packages[1:], limit1, limit2, first + packages[:1], second, third, acc)
-    organize(packages[1:], limit1, limit2, first, second + packages[:1], third, acc)
-    organize(packages[1:], limit1, limit2, first, second, third + packages[:1], acc)
+def cache(func):
+    saved_values = {}
+    @wraps(func)
+    def new_func(*args):
+        if tuple(args) in saved_values:
+            return saved_values[tuple(args)]
 
-def solve(packages):
-    
+        result = func(*args)
+        saved_values[tuple(args)] = result
+
+        return result
+
+    return new_func
+
+def get_groups(packages, target, length, acc1, acc2):
+
+    if sum(acc1) > target:
+        return
+
+    if sum(acc1) == target:
+        acc2.append(acc1)
+
+    if sum(packages[:length]) + sum(acc1) < target:
+        return
+
+    if length == 0:
+        return
+
+    for package in packages:
+        new_packages = packages[:]
+        new_packages.remove(package)
+
+        new_acc = acc1[:]
+        new_acc.append(package)
+
+        get_groups(new_packages, target, length - 1, new_acc, acc2)
+
+
+def solve(packages, num_of_groups):
+
+    packages.sort(reverse=True)
     results = []
-    organize(packages, sum(packages) / 3, len(packages) / 3, [], [], [], results)
-    results.sort(key=lambda groups: (len(groups[0]), reduce(mul, groups[0], 1)))
-    
-    for first, second, third in results:
-        print "{0} - {1} - {2}".format(",".join(map(str, first)), ",".join(map(str, second)), ",".join(map(str, third)))
-    return reduce(mul, results[0][0], 1)
+    for i in xrange(1, len(packages)):
+        get_groups(packages, sum(packages) / num_of_groups, i, [], results)
+
+        if len(results) != 0:
+            break
+
+    results.sort(key=lambda groups: reduce(mul, groups, 1))
+    return reduce(mul, results[0], 1)
 
 
-print solve([i for i in xrange(1, 12) if i != 6])
+print solve([i for i in xrange(1, 12) if i != 6], 3)
+print solve([i for i in xrange(1, 12) if i != 6], 4)
 
 numbers = map(int, open('input.txt', 'r').read().strip().split('\n'))
-print solve(numbers)
+print solve(numbers, 3)
+print solve(numbers, 4)
