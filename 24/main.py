@@ -1,19 +1,5 @@
 from operator import mul
-from functools import wraps
 
-def cache(func):
-    saved_values = {}
-    @wraps(func)
-    def new_func(*args):
-        if tuple(args) in saved_values:
-            return saved_values[tuple(args)]
-
-        result = func(*args)
-        saved_values[tuple(args)] = result
-
-        return result
-
-    return new_func
 
 def get_groups(packages, target, length, acc1, acc2):
 
