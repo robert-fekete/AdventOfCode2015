@@ -1,5 +1,6 @@
 import re
 from collections import deque, Counter
+import heapq
 
 
 def solve_first(input_string):
@@ -51,7 +52,6 @@ def solve_second(input_string):
     parts = [part for part in input_string.strip().split('\n') if part != ""]
     replacement_strings = parts[:-1]
     required_molecule = parts[-1]
-    required_atoms = tokenize(required_molecule)
 
     replacements = {}
 
@@ -63,67 +63,43 @@ def solve_second(input_string):
 
         replacements[from_what].append(to_what)
         
-    queue = deque([])
+    heap = []
     visited = {}
 
-    queue.append(('e', 0))
+    heapq.heappush(heap, (len(required_molecule), 0, required_molecule))
 
     max_steps = 0
-    while len(queue) > 0:
+    while len(heap) > 0:
 
-        molecule, steps = queue.popleft()
+        length, steps, molecule = heapq.heappop(heap)
         
         if max_steps < steps:
-            print steps
+            print "depth: {0}".format(steps)
             max_steps = steps
-            print len(queue)
+            # print len(queue)
 
+        if molecule == 'e':
+            return steps
 
-        molecule_length = len(molecule)
-        if molecule_length not in visited:
-            visited[molecule_length] = {}
+        if length not in visited:
+            visited[length] = {}
 
-        if molecule in visited[molecule_length]:
+        if molecule in visited[length]:
             continue
 
-        visited[molecule_length][molecule] = True
+        visited[length][molecule] = True
 
-        if molecule_length > len(required_molecule):
-            continue
-            
         atoms = tokenize(molecule)
-        if "Y" in atoms and atoms["Y"] > required_atoms["Y"]:
-            continue
-
-        if "Rn" in atoms and atoms["Rn"] > required_atoms["Rn"]:
-            continue
-
-        if "Ar" in atoms and atoms["Ar"] > required_atoms["Ar"]:
-            continue
-            
 
         mol_list = list(molecule)
         for i in xrange(len(molecule)):
-            if molecule[i] in replacements:
-                fromm = molecule[i]
-                for to in replacements[fromm]:
-                    new_molecule = mol_list[:i] + [to] + mol_list[i+1:]
+            for from_what in replacements:
+                for to_what in replacements[from_what]:
 
-                    new_molecule = "".join(new_molecule)
-                    if new_molecule == required_molecule:
-                        return steps + 1
-                    queue.append((new_molecule, steps + 1))
-                    
-            elif molecule[i:i+2] in replacements:
-                fromm = molecule[i:i+2]
-                for to in replacements[fromm]:
-                    new_molecule = mol_list[:i] + list(to) + mol_list[i+2:]
-
-                    new_molecule = "".join(new_molecule)
-                    if new_molecule == required_molecule:
-                        return steps + 1
-                    queue.append((new_molecule, steps + 1))
-                
+                    if molecule[i:i+len(to_what)] == to_what:
+                        new_molecule = mol_list[:i] + [from_what] + mol_list[i+len(to_what):]
+                        new_molecule = "".join(new_molecule)
+                        heapq.heappush(heap,(len(new_molecule), steps + 1, new_molecule))
 
     return -1
 
@@ -134,7 +110,7 @@ def solve_second(input_string):
 # print solve_first("Mg => WUT\n\nMgMg")  # 2
 # print solve_first(open(r'.\input.txt', 'r').read())
 #
-# print solve_second("e => O\ne => H\nH => HO\nH => OH\nO => HH\n\nHOH")  # 3
-# print solve_second("e => O\ne => H\nH => HO\nH => OH\nO => HH\n\nHOHOHO")  # 6
-# print solve_second("e => Mg\nMg => MgMg\nMg => Ag\n\nAgAg")  # 4
+print solve_second("e => O\ne => H\nH => HO\nH => OH\nO => HH\n\nHOH")  # 3
+print solve_second("e => O\ne => H\nH => HO\nH => OH\nO => HH\n\nHOHOHO")  # 6
+print solve_second("e => Mg\nMg => MgMg\nMg => Ag\n\nAgAg")  # 4
 print solve_second(open(r'.\input.txt', 'r').read())
